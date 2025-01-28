@@ -1,16 +1,16 @@
-﻿using Elasticsearch.API.DTOs;
+﻿using Elastic.Clients.Elasticsearch;
+using Elasticsearch.API.DTOs;
 using Elasticsearch.API.Models;
-using Nest;
 using System.Collections.Immutable;
 
 namespace Elasticsearch.API.Repositories
 {
     public class ProductRepository
     {
-        private readonly ElasticClient _client;
+        private readonly ElasticsearchClient _client;
         private const string productsIndexName = "products";
 
-        public ProductRepository(ElasticClient client)
+        public ProductRepository(ElasticsearchClient client)
         {
             _client = client;
         }
@@ -21,7 +21,7 @@ namespace Elasticsearch.API.Repositories
 
             var response = await _client.IndexAsync(newProduct, x => x.Index(productsIndexName).Id(Guid.NewGuid().ToString()));
 
-            if (!response.IsValid) return null;
+            if (!response.IsSuccess()) return null;
 
             newProduct.Id = response.Id;
             return newProduct;
@@ -29,7 +29,7 @@ namespace Elasticsearch.API.Repositories
 
         public async Task<ImmutableList<Product>> GetAllAsync()
         {
-            var response = await _client.SearchAsync<Product>(s => s.Index(productsIndexName).Query(q => q.MatchAll()));
+            var response = await _client.SearchAsync<Product>(s => s.Index(productsIndexName).Query(q => q.MatchAll(m => { })));
 
             foreach (var hit in response.Hits) hit.Source.Id = hit.Id;
 
@@ -40,7 +40,7 @@ namespace Elasticsearch.API.Repositories
         {
             var response = await _client.GetAsync<Product>(id, x => x.Index(productsIndexName));
 
-            if (!response.IsValid)
+            if (!response.IsSuccess())
                 return null;
 
             response.Source.Id = response.Id;
@@ -49,9 +49,9 @@ namespace Elasticsearch.API.Repositories
 
         public async Task<bool> UpdateAsync(ProductUpdateDto updateProduct)
         {
-            var response = await _client.UpdateAsync<Product, ProductUpdateDto>(updateProduct.Id, x => x.Index(productsIndexName).Doc(updateProduct));
+            var response = await _client.UpdateAsync<Product, ProductUpdateDto>(productsIndexName, updateProduct.Id, x=>x.Doc(updateProduct));
 
-            return response.IsValid;
+            return response.IsSuccess();
         }
 
         /// <summary>
