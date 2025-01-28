@@ -54,11 +54,16 @@ namespace Elasticsearch.API.Repositories
             return response.IsValid;
         }
 
-        public async Task<bool> DeleteAsync(string id)
+        /// <summary>
+        /// This method is discussed for error management.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<DeleteResponse> DeleteAsync(string id)
         {
             var response = await _client.DeleteAsync<Product>(id, x => x.Index(productsIndexName));
 
-            return response.IsValid;
+            return response;
         }
     }
 }
