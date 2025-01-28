@@ -21,7 +21,7 @@ namespace Elasticsearch.API.Services
 
             if (response == null)
             {
-                return ResponseDto<ProductDto>.Fail(new List<string> { "An error occurred while saving the product." }, HttpStatusCode.InternalServerError);
+                return ResponseDto<ProductDto>.Fail("An error occurred while saving the product.", HttpStatusCode.InternalServerError);
             }
 
             return ResponseDto<ProductDto>.Success(response.CreateDto(), HttpStatusCode.Created);
@@ -34,7 +34,7 @@ namespace Elasticsearch.API.Services
 
             foreach (var product in products)
             {
-                if(product.Feature is null)
+                if (product.Feature is null)
                 {
                     productListDto.Add(new ProductDto(product.Id, product.Name, product.Price, product.Stock, null));
                 }
@@ -52,12 +52,37 @@ namespace Elasticsearch.API.Services
         {
             var hasProduct = await _productRepository.GetByIdAsync(id);
 
-            if(hasProduct == null)
+            if (hasProduct == null)
             {
-                return ResponseDto<ProductDto>.Fail(new List<string> { "Product not found." }, HttpStatusCode.NotFound);
+                return ResponseDto<ProductDto>.Fail("Product not found.", HttpStatusCode.NotFound);
             }
 
             return ResponseDto<ProductDto>.Success(hasProduct.CreateDto(), HttpStatusCode.OK);
         }
+
+        public async Task<ResponseDto<bool>> UpdateAsync(ProductUpdateDto updateProduct)
+        {
+            var isSuccessful = await _productRepository.UpdateAsync(updateProduct);
+
+            if (!isSuccessful)
+            {
+                return ResponseDto<bool>.Fail("An error occurred while updating the product.", HttpStatusCode.InternalServerError);
+            }
+
+            return ResponseDto<bool>.Success(isSuccessful, HttpStatusCode.NoContent);
+        }
+
+        public async Task<ResponseDto<bool>> DeleteAsync(string id)
+        {
+            var isSuccessful = await _productRepository.DeleteAsync(id);
+
+            if (!isSuccessful)
+            {
+                return ResponseDto<bool>.Fail("An error occurred while deleting the product.", HttpStatusCode.InternalServerError);
+            }
+
+            return ResponseDto<bool>.Success(isSuccessful, HttpStatusCode.NoContent);
+        }
+
     }
 }
