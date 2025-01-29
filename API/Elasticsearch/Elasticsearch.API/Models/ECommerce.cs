@@ -14,6 +14,8 @@ namespace Elasticsearch.API.Models.ECommerceModels
         public string CustomerFullName { get; set; } = null!;
         [JsonPropertyName("category")]
         public string[] Category { get; set; } = null!;
+        [JsonPropertyName("taxful_total_price")]
+        public double TaxfulTotalPrice { get; set; }
         [JsonPropertyName("order_id")]
         public int OrderId { get; set; }
         [JsonPropertyName("order_date")]

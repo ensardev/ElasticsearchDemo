@@ -113,5 +113,72 @@ namespace Elasticsearch.API.Repositories
 
             return result.Documents.ToImmutableList();
         }
+
+        public async Task<ImmutableList<ECommerce>> RangeQueryAsync(double FromPrice, double ToPrice)
+        {
+            var result = await _client.SearchAsync<ECommerce>(s =>
+                s.Index(indexName).Size(1000)
+                .Query(q =>
+                    q.Range(r =>
+                        r.NumberRange(nr =>
+                            nr.Field(f =>
+                                f.TaxfulTotalPrice).Gte(FromPrice).Lte(ToPrice)
+                            )
+                        )
+                    )
+                );
+
+            foreach (var hit in result.Hits) hit.Source.Id = hit.Id;
+
+            return result.Documents.ToImmutableList();
+        }
+
+        public async Task<ImmutableList<ECommerce>> MatchAllQueryAsync()
+        {
+            var result = await _client.SearchAsync<ECommerce>(s =>
+                s.Index(indexName)
+                .Query(q =>
+                    q.MatchAll(m => { })
+                )
+            );
+
+            foreach (var hit in result.Hits) hit.Source.Id = hit.Id;
+
+            return result.Documents.ToImmutableList();
+        }
+
+        public async Task<ImmutableList<ECommerce>> MatchAllQueryWithPaginationAsync(int page, int pageSize)
+        {
+            var result = await _client.SearchAsync<ECommerce>(s =>
+                s.Index(indexName)
+                .From((page - 1) * pageSize)
+                .Size(pageSize)
+                .Query(q =>
+                    q.MatchAll(m => { })
+                )
+            );
+
+            foreach (var hit in result.Hits) hit.Source.Id = hit.Id;
+
+            return result.Documents.ToImmutableList();
+        }
+
+        public async Task<ImmutableList<ECommerce>> WildCardQueryAsync(string customerFullName)
+        {
+            var result = await _client.SearchAsync<ECommerce>(s =>
+                s.Index(indexName)
+                .Query(q =>
+                    q.Wildcard(w =>
+                        w.Field(f =>
+                            f.CustomerFullName.Suffix("keyword"))
+                            .Wildcard(customerFullName)
+                        )
+                    )
+                );
+
+            foreach (var hit in result.Hits) hit.Source.Id = hit.Id;
+
+            return result.Documents.ToImmutableList();
+        }
     }
 }

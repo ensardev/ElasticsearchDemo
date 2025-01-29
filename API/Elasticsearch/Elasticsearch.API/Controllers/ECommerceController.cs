@@ -38,5 +38,37 @@ namespace Elasticsearch.API.Controllers
 
             return Ok(result);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> RangeQuery(double fromPrice, double toPrice)
+        {
+            var result = await _eCommerceRepository.RangeQueryAsync(fromPrice, toPrice);
+
+            return Ok(result);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> MatchAllQuery()
+        {
+            var result = await _eCommerceRepository.MatchAllQueryAsync();
+
+            return Ok(result);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> MatchAllQueryWithPagination(int page, int pageSize)
+        {
+            var result = await _eCommerceRepository.MatchAllQueryWithPaginationAsync(page, pageSize);
+
+            return Ok(result);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> WildCardQuery(string customerFullName)
+        {
+            var result = await _eCommerceRepository.WildCardQueryAsync(customerFullName);
+
+            return Ok(result);
+        }
     }
 }
