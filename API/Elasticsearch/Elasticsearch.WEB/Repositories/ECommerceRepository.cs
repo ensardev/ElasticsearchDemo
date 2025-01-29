@@ -20,6 +20,12 @@ namespace Elasticsearch.WEB.Repositories
         {
             List<Action<QueryDescriptor<ECommerce>>> listQuery = new();
 
+            if (searchViewModel is null)
+            {
+                listQuery.Add(q => q.MatchAll(m => { }));
+                return await ResultSet(page, pageSize, listQuery);
+            }
+
             if (!string.IsNullOrEmpty(searchViewModel.Category))
             {
                 Action<QueryDescriptor<ECommerce>> query = q => q.Match(m => m.Field(f => f.Category).Query(searchViewModel.Category));
@@ -46,9 +52,18 @@ namespace Elasticsearch.WEB.Repositories
 
             if (!string.IsNullOrEmpty(searchViewModel.Gender))
             {
-                Action<QueryDescriptor<ECommerce>> query = q => q.Term(t => t.Field(f => f.CustomerFullName).Value(searchViewModel.Gender));
+                Action<QueryDescriptor<ECommerce>> query = q => q.Term(t => t.Field(f => f.Gender).Value(searchViewModel.Gender).CaseInsensitive());
+                listQuery.Add(query);
             }
 
+            if (!listQuery.Any())
+                listQuery.Add(q => q.MatchAll(m => { }));
+
+            return await ResultSet(page, pageSize, listQuery);
+        }
+
+        private async Task<(List<ECommerce>, long Count)> ResultSet(int page, int pageSize, List<Action<QueryDescriptor<ECommerce>>> listQuery)
+        {
             var pageFrom = (page - 1) * pageSize;
 
             var result = await _client.SearchAsync<ECommerce>(x => x.Index(indexName).Query(q => q.Bool(b => b.Must(listQuery.ToArray()))).From(pageFrom).Size(pageSize));
@@ -57,6 +72,5 @@ namespace Elasticsearch.WEB.Repositories
 
             return (result.Documents.ToList(), result.Total);
         }
-
     }
 }
