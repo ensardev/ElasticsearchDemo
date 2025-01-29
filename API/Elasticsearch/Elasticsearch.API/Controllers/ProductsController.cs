@@ -1,6 +1,5 @@
 ﻿using Elasticsearch.API.DTOs;
 using Elasticsearch.API.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Elasticsearch.API.Controllers
