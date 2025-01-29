@@ -23,9 +23,14 @@ namespace Elasticsearch.WEB.Services
                 UserId = Guid.NewGuid()
             };
 
-            var isCreatedBlog = await _blogRepository.SaveAsync(newBlog);
+            var isCreatedBlog = _blogRepository.SaveAsync(newBlog);
 
             return isCreatedBlog != null;
+        }
+
+        public async Task<List<Blog>> SearchAsync(string searchText)
+        {
+            return await _blogRepository.SearchAsync(searchText);
         }
     }
 }
