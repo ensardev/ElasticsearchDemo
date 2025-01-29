@@ -1,5 +1,6 @@
 ﻿using Elasticsearch.API.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using System.Runtime.CompilerServices;
 
 namespace Elasticsearch.API.Controllers
 {
@@ -17,7 +18,23 @@ namespace Elasticsearch.API.Controllers
         [HttpGet]
         public async Task<IActionResult> TermQuery(string customerFirstName)
         {
-            var result = await _eCommerceRepository.TermQuery(customerFirstName);
+            var result = await _eCommerceRepository.TermQueryAsync(customerFirstName);
+
+            return Ok(result);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> TermsQuery(List<string> customerFirstNameList)
+        {
+            var result = await _eCommerceRepository.TermsQueryAsync(customerFirstNameList);
+
+            return Ok(result);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> PrefixQuery(string customerFullName)
+        {
+            var result = await _eCommerceRepository.PrefixQueryAsync(customerFullName);
 
             return Ok(result);
         }
