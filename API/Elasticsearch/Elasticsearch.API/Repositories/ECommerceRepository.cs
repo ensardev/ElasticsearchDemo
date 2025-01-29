@@ -221,5 +221,39 @@ namespace Elasticsearch.API.Repositories
 
             return result.Documents.ToImmutableList();
         }
+
+        public async Task<ImmutableList<ECommerce>> MatchBoolPrefixQueryFullTextAsync(string customerFullName)
+        {
+            var result = await _client.SearchAsync<ECommerce>(s => s.Index(indexName)
+                .Query(q =>
+                    q.MatchBoolPrefix(m =>
+                        m.Field(f =>
+                            f.CustomerFullName)
+                            .Query(customerFullName)
+                        )
+                    )
+                );
+
+            foreach (var hit in result.Hits) hit.Source.Id = hit.Id;
+
+            return result.Documents.ToImmutableList();
+        }
+
+        public async Task<ImmutableList<ECommerce>> MatchPhraseQueryFullTextAsync(string customerFullName)
+        {
+            var result = await _client.SearchAsync<ECommerce>(s => s.Index(indexName)
+                .Query(q =>
+                    q.MatchPhrase(m =>
+                        m.Field(f =>
+                            f.CustomerFullName)
+                            .Query(customerFullName)
+                        )
+                    )
+                );
+
+            foreach (var hit in result.Hits) hit.Source.Id = hit.Id;
+
+            return result.Documents.ToImmutableList();
+        }
     }
 }
