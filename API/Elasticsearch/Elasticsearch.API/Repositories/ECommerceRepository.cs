@@ -255,5 +255,66 @@ namespace Elasticsearch.API.Repositories
 
             return result.Documents.ToImmutableList();
         }
+
+        public async Task<ImmutableList<ECommerce>> CompoundQueryExampleFirstAsync(string cityName, double taxfullTotalPrice, string categoryName, string manufacturerName)
+        {
+            var result = await _client.SearchAsync<ECommerce>(s => s.Index(indexName)
+                .Query(q =>
+                    q.Bool(b =>
+                        b.Must(m =>
+                            m.Term(t =>
+                                t.Field("geoip.city_name").Value(cityName)
+                                )
+                            )
+                        .MustNot(mn =>
+                            mn.Range(r =>
+                                r.NumberRange(nr =>
+                                    nr.Field(f =>
+                                        f.TaxfulTotalPrice).Lte(taxfullTotalPrice)
+                                    )
+                                )
+                            )
+                        .Should(s =>
+                            s.Term(t =>
+                                t.Field(f =>
+                                    f.Category.Suffix("keyword")).Value(categoryName)
+                                    )
+                            )
+                        .Filter(f =>
+                            f.Term(t => t.Field("manufacturer.keyword").Value(manufacturerName)
+                                )
+                            )
+                        )
+                    )
+                );
+
+            foreach (var hit in result.Hits) hit.Source.Id = hit.Id;
+
+            return result.Documents.ToImmutableList();
+        }
+
+        public async Task<ImmutableList<ECommerce>> CompoundQueryExampleSecondAsync(string customerFullName)
+        {
+            var result = await _client.SearchAsync<ECommerce>(s => s.Index(indexName)
+                .Query(q =>
+                    q.Bool(b =>
+                        b.Should(s =>
+                            s.Match(ma =>
+                                ma.Field(f => 
+                                    f.CustomerFullName).Query(customerFullName)
+                                )
+                            .Prefix(p => 
+                                p.Field(f=> 
+                                    f.CustomerFullName.Suffix("keyword")).Value(customerFullName)
+                                )
+                            )
+                        )
+                    )
+                );
+
+            foreach (var hit in result.Hits) hit.Source.Id = hit.Id;
+
+            return result.Documents.ToImmutableList();
+        }
     }
 }

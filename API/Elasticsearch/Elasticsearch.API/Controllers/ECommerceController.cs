@@ -95,11 +95,26 @@ namespace Elasticsearch.API.Controllers
             return Ok(result);
         }
 
-
         [HttpGet]
         public async Task<IActionResult> MatchPhraseFullText(string customerFullName)
         {
             var result = await _eCommerceRepository.MatchPhraseQueryFullTextAsync(customerFullName);
+
+            return Ok(result);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> CompoundQueryExampleFirst(string cityName, double taxfullTotalPrice, string categoryName, string manufacturerName)
+        {
+            var result = await _eCommerceRepository.CompoundQueryExampleFirstAsync(cityName, taxfullTotalPrice, categoryName, manufacturerName);
+
+            return Ok(result);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> CompoundQueryExampleSecond(string customerFullName)
+        {
+            var result = await _eCommerceRepository.CompoundQueryExampleSecondAsync(customerFullName);
 
             return Ok(result);
         }
