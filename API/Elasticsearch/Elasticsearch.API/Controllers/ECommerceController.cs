@@ -118,5 +118,13 @@ namespace Elasticsearch.API.Controllers
 
             return Ok(result);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> MultiMatchQuery(string name)
+        {
+            var result = await _eCommerceRepository.MultiMatchQueryAsync(name);
+
+            return Ok(result);
+        }
     }
 }

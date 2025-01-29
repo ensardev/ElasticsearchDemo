@@ -300,11 +300,11 @@ namespace Elasticsearch.API.Repositories
                     q.Bool(b =>
                         b.Should(s =>
                             s.Match(ma =>
-                                ma.Field(f => 
+                                ma.Field(f =>
                                     f.CustomerFullName).Query(customerFullName)
                                 )
-                            .Prefix(p => 
-                                p.Field(f=> 
+                            .Prefix(p =>
+                                p.Field(f =>
                                     f.CustomerFullName.Suffix("keyword")).Value(customerFullName)
                                 )
                             )
@@ -315,6 +315,25 @@ namespace Elasticsearch.API.Repositories
             foreach (var hit in result.Hits) hit.Source.Id = hit.Id;
 
             return result.Documents.ToImmutableList();
+        }
+
+        public async Task<ImmutableList<ECommerce>> MultiMatchQueryAsync(string name)
+        {
+            var result = await _client.SearchAsync<ECommerce>(s => s.Index(indexName)
+            .Query(q =>
+                    q.MultiMatch(m =>
+                        m.Fields(new Field("customer_first_name")
+                            .And(new Field("customer_last_name"))
+                            .And(new Field("customer_full_name")))
+                        .Query(name)
+                        )
+                    )
+                );
+
+            foreach (var hit in result.Hits) hit.Source.Id = hit.Id;
+
+            return result.Documents.ToImmutableList();
+
         }
     }
 }
